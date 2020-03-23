@@ -1,0 +1,45 @@
+"""
+edited by praveen with hari prasad on 8th may 2019
+This code continuosly captures and sends images to adafruit IO.
+Also monitor adafruit IO for robot direction movement
+"""
+
+# Import standard python modules
+#import time
+import base64
+
+# import Adafruit IO REST client
+from Adafruit_IO import Client, RequestError
+
+# import picam libraries
+import picamera
+
+
+# Setting Adafruit IO key and user name
+ADAFRUIT_IO_KEY = '8c2f3c0c82e74e52892cc4e42f2f81f9'
+ADAFRUIT_IO_USERNAME = 'praveengs2008'
+
+# Create an instance of the REST client
+aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+
+# set up Adafruit IO feeds
+picam_feed = aio.feeds('picam')
+
+# set up picamera, resolution (note memory <100kb)
+camera = picamera.PiCamera()
+camera.resolution = (250, 250)
+print('Adafruit IO Smart Robot sending images')
+
+while True:
+    
+    camera.capture('picam.jpg')
+    print('snap taken!')
+    with open("picam.jpg", "rb") as imageFile:
+        image = base64.b64encode(imageFile.read())
+        send_str = image.decode("utf-8")
+        try:
+            aio.send(picam_feed.key, send_str)
+            print('Snap sent to AIO!')
+        except RequestError:
+                print('Sending image failed... ')
+
