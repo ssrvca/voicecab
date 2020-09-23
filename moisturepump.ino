@@ -3,16 +3,16 @@
 #include "Adafruit_MQTT_Client.h"
 
 
-#define WIFI_SSID "agribot"
-#define WIFI_PASS "agribot321"
-#define WIFI_SSID "swaru"
-#define WIFI_PASS "swaru65089"
+#define WIFI_SSID "agribot2020"
+#define WIFI_PASS "agribot2020"
+//#define WIFI_SSID "vivo 1718"
+//#define WIFI_PASS "sharu1998"
 
 
 #define MQTT_SERV "io.adafruit.com"
 #define MQTT_PORT 1883
 #define MQTT_NAME "ssrvca"
-#define MQTT_PASS "aio_YTan82kQOyHcHssvL5Ju8p0r2EsA"
+#define MQTT_PASS "aio_tEfS500OpHpzAswW9I0fO1BLnuYe"
 #define ROBO_REPLY_MSG "I am AGRIBOT"
 
 
@@ -58,6 +58,13 @@ void setup()
     delay(50);
     digitalWrite(LED_BUILTIN,HIGH);
     delay(500);
+    digitalWrite(forward1,LOW);
+    digitalWrite(reverse1, LOW);
+    digitalWrite(left1, LOW);
+    digitalWrite(right1, LOW); 
+    digitalWrite(alert, LOW);
+    digitalWrite(waterpump, LOW);
+    digitalWrite(grasscut, LOW);
   }
   Serial.print("WIFI Connected\n");
  
@@ -111,6 +118,7 @@ void loop()
         digitalWrite(right1, LOW); 
         Serial.print("moving forward\n");       
         robotreplymessage.publish("Moving Forward");
+        delay(50);
       }
       else
       {
@@ -125,7 +133,7 @@ void loop()
 //////////////////////////////////////////////////////////// REVERSE 
     if (subscription == &d_reverse)                                           
     {
-      
+       //scan whether reverse button is pressed
       
       if (strcmp((char*) d_reverse.lastread, "0"))
       {
@@ -135,6 +143,7 @@ void loop()
         digitalWrite(right1, HIGH);
         Serial.print("moving reverse\n"); 
         robotreplymessage.publish("Moving Reverse");
+         delay(50);
       }
       else 
       {
@@ -150,7 +159,7 @@ void loop()
     if (subscription == &d_left)                                     
     {
       
-      //scan whether reverse button is pressed
+      //scan whether left button is pressed
       if (strcmp((char*) d_left.lastread, "0"))
       {
         digitalWrite(forward1, LOW);
@@ -159,6 +168,7 @@ void loop()
         digitalWrite(right1, LOW);
         Serial.print("took left\n");
         robotreplymessage.publish("Took Left"); 
+         delay(50);
       }
       else 
       {
@@ -176,7 +186,7 @@ void loop()
     if (subscription == &d_right)                                
     {
       
-      //scan whether reverse button is pressed
+      //scan whether right button is pressed
       if (strcmp((char*) d_right.lastread, "0"))
       {
         digitalWrite(forward1, HIGH);
@@ -185,6 +195,7 @@ void loop()
         digitalWrite(right1, HIGH);
         Serial.print("took right\n"); 
         robotreplymessage.publish("Took Right");
+        delay(50);
       }
       else 
       {
@@ -225,13 +236,26 @@ void loop()
     if (subscription == &water_moisture)
     {
       
-      //scan whether reverse button is pressed
+      
       if (strcmp((char*) water_moisture.lastread, "0"))
       {
         int data=analogRead(A0);  
      robotreplymessage.publish(data); 
      //String data1=data; 
+     if(analogRead(A0)>400)
+     {
+        digitalWrite(waterpump, HIGH);
+       Serial.print("water_pump_on\n");
+       robotreplymessage.publish("Water pump on");
+     }
+     else {
+     Serial.print("field_is_wet\n");
+       robotreplymessage.publish("Field is wet");
       Serial.print(data);
+      if (water_state)
+      digitalWrite(waterpump, LOW);
+        Serial.print("Field is wet\n water pump_off\n");
+        robotreplymessage.publish("Field is Wet so Water pump Off");}
       }
       
     }
@@ -273,7 +297,7 @@ if (subscription == &water_pump)
         }
         else
         {
-         digitalWrite(waterpump, LOW);
+         digitalWrite(grasscut, LOW);
         Serial.print("Grass cutter off\n");
         robotreplymessage.publish("Grass cutter off");
                   
